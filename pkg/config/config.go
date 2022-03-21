@@ -11,11 +11,16 @@ import (
 	"git.irootech.com/sre/queryexporter/pkg/types"
 )
 
+type Metric struct {
+	*types.Metric `yaml:",inline"`
+	DataSources   []*types.DataSource `yaml:"datasources"`
+}
+
 type Config struct {
-	LogLevel string                     `yaml:"logLevel"`
-	Addr     string                     `yaml:"addr" default:":9696"`
-	Servers  []*types.Server            `yaml:"servers"`
-	Metrics  map[string][]*types.Metric `yaml:"metrics"`
+	LogLevel string               `yaml:"logLevel"`
+	Addr     string               `yaml:"addr" default:":9696"`
+	Servers  []*types.Server      `yaml:"servers"`
+	Metrics  map[string][]*Metric `yaml:"metrics"`
 }
 
 func (c *Config) validateAndSetDefaults() error {
@@ -26,7 +31,7 @@ func (c *Config) validateAndSetDefaults() error {
 		}
 		servers[server.Name] = server
 	}
-	setFunc := func(metrics []*types.Metric) error {
+	setFunc := func(metrics []*Metric) error {
 		for i := range metrics {
 			m := metrics[i]
 			for j := range m.DataSources {

@@ -16,8 +16,9 @@ type Server struct {
 }
 
 type DataSource struct {
-	Server `yaml:",inline"`
-	Table  string `yaml:"table"`
+	Server   `yaml:",inline"`
+	Database string `yaml:"database"`
+	Table    string `yaml:"table"`
 }
 
 type Metric struct {
@@ -28,9 +29,8 @@ type Metric struct {
 	VariableLabels []string `yaml:"variableLabels,omitempty"`
 	// for taking value from result
 	// can be string or $1/$2 index
-	VariableValue interface{}       `yaml:"variableValue"`
+	VariableValue string            `yaml:"variableValue"`
 	ConstLabels   prometheus.Labels `yaml:"constLabels,omitempty"`
-	DataSources   []*DataSource     `yaml:"datasources"`
 	Query         string            `yaml:"query"`
 
 	desc *prometheus.Desc
