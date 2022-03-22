@@ -12,7 +12,7 @@ import (
 
 type Interface interface {
 	// Name() string
-	Query(ctx context.Context, ds *types.DataSource, metric *types.Metric) ([]types.Result, error)
+	Query(ctx context.Context, ds *types.DataSource, query string) ([]types.Result, error)
 }
 
 type Factory struct {
@@ -31,7 +31,7 @@ func (f *Factory) Process(ctx context.Context, namespace, driver string, dss []*
 				errCh <- fmt.Errorf("querier %s not implemented yet", driver)
 				return
 			}
-			rets, err := iface.Query(ctx, ds, metric)
+			rets, err := iface.Query(ctx, ds, metric.Query)
 			if err != nil {
 				errCh <- err
 				return

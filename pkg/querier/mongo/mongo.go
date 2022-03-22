@@ -41,9 +41,9 @@ func (d *mongoDriver) aggregate(ctx context.Context, uri, db, col string, pipeli
 	return client.Database(db).Collection(col).Aggregate(ctx, pipeline)
 }
 
-func (d *mongoDriver) Query(ctx context.Context, ds *types.DataSource, metric *types.Metric) ([]types.Result, error) {
+func (d *mongoDriver) Query(ctx context.Context, ds *types.DataSource, query string) ([]types.Result, error) {
 	var pipeline bson.A
-	if err := bson.UnmarshalExtJSON([]byte(metric.Query), false, &pipeline); err != nil {
+	if err := bson.UnmarshalExtJSON([]byte(query), false, &pipeline); err != nil {
 		return nil, err
 	}
 	cur, err := d.aggregate(ctx, ds.URI, ds.Database, ds.Table, pipeline)

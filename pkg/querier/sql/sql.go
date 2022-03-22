@@ -32,12 +32,12 @@ func (d *sqlDriver) getCachedClient(uri string) (*sql.DB, error) {
 	return db, nil
 }
 
-func (d *sqlDriver) Query(ctx context.Context, ds *types.DataSource, metric *types.Metric) ([]types.Result, error) {
+func (d *sqlDriver) Query(ctx context.Context, ds *types.DataSource, query string) ([]types.Result, error) {
 	db, err := d.getCachedClient(ds.URI)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := db.Query(metric.Query)
+	rows, err := db.Query(query)
 	if err != nil {
 		return nil, err
 	}
