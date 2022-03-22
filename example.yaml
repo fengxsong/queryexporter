@@ -1,0 +1,28 @@
+enableProfile: false
+logFormat: json
+logLevel: debug
+servers:
+  - name: test-mysql
+    uri: username:password@protocol(address)/dbname?param=value
+  - name: test-pg
+    uri: "host=${TEST_PG_HOST} port=5432 user=${TEST_PG_USER} password=${TEST_PG_PASSWORD} dbname=dbname sslmode=disable"
+metrics:
+  mysql:
+    - name: test_count
+      query: select count(*) from table_name
+      variableValue: "count(*)"
+      type: gauge
+      datasources:
+        - name: test-mysql
+          database: dbname
+  postgres:
+    - name: test_count
+      query: select count(*) from table_name
+      variableValue: "count(*)"
+      type: gauge
+      datasources:
+        - name: test-pg
+          database: dbname
+          table: table_name
+  mongo:
+  # same as mysql/pg

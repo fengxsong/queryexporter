@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -21,6 +22,7 @@ func (r Result) GetValue(k string) (float64, error) {
 	if !ok {
 		return 0, fmt.Errorf("cannot find value field %s", k)
 	}
+
 	switch val.(type) {
 	case float32:
 		return float64(val.(float32)), nil
@@ -30,8 +32,10 @@ func (r Result) GetValue(k string) (float64, error) {
 		return float64(val.(int32)), nil
 	case int64:
 		return float64(val.(int64)), nil
+	case []byte:
+		return strconv.ParseFloat(string(val.([]uint8)), 64)
 	default:
-		return 0, fmt.Errorf("value must be number, type %T given", val)
+		return 0, fmt.Errorf("value must be number /or bytes, type %T value %v given", val, val)
 	}
 }
 

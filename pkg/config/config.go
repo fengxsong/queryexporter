@@ -17,10 +17,12 @@ type Metric struct {
 }
 
 type Config struct {
-	LogLevel string               `yaml:"logLevel"`
-	Addr     string               `yaml:"addr" default:":9696"`
-	Servers  []*types.Server      `yaml:"servers"`
-	Metrics  map[string][]*Metric `yaml:"metrics"`
+	LogLevel      string               `yaml:"logLevel" default:"info"`
+	LogFormat     string               `yaml:"logFormat" default:"console"`
+	Addr          string               `yaml:"addr" default:":9696"`
+	EnableProfile *bool                `yaml:"enableProfile" default:"true"`
+	Servers       []*types.Server      `yaml:"servers"`
+	Metrics       map[string][]*Metric `yaml:"metrics"`
 }
 
 func (c *Config) validateAndSetDefaults() error {
@@ -30,6 +32,9 @@ func (c *Config) validateAndSetDefaults() error {
 			return fmt.Errorf("duplicate server %s", server.Name)
 		}
 		servers[server.Name] = server
+	}
+	if err := defaults.Set(c); err != nil {
+		return err
 	}
 	setFunc := func(metrics []*Metric) error {
 		for i := range metrics {
@@ -54,7 +59,7 @@ func (c *Config) validateAndSetDefaults() error {
 			return err
 		}
 	}
-	return defaults.Set(c)
+	return nil
 }
 
 func ReadFromFile(fn string) (*Config, error) {

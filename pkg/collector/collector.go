@@ -5,11 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"git.irootech.com/sre/queryexporter/pkg/config"
+	_ "git.irootech.com/sre/queryexporter/pkg/querier"
 	"git.irootech.com/sre/queryexporter/pkg/querier/factory"
 )
 

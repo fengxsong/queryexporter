@@ -28,7 +28,6 @@ type Metric struct {
 	// for dynamic labels from query results
 	VariableLabels []string `yaml:"variableLabels,omitempty"`
 	// for taking value from result
-	// can be string or $1/$2 index
 	VariableValue string            `yaml:"variableValue"`
 	ConstLabels   prometheus.Labels `yaml:"constLabels,omitempty"`
 	Query         string            `yaml:"query"`

@@ -4,21 +4,25 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"net/http/pprof"
 
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Handler struct {
 	server *http.Server
+	logger log.Logger
 }
 
 type options struct {
-	addr       string
-	logger     log.Logger
-	registry   *prometheus.Registry
-	collectors []prometheus.Collector
+	addr          string
+	enableProfile bool
+	logger        log.Logger
+	registry      *prometheus.Registry
+	collectors    []prometheus.Collector
 }
 
 type Option func(*options)
@@ -26,6 +30,12 @@ type Option func(*options)
 func WithAddr(addr string) Option {
 	return func(o *options) {
 		o.addr = addr
+	}
+}
+
+func WithEnableProfile(b bool) Option {
+	return func(o *options) {
+		o.enableProfile = b
 	}
 }
 
@@ -64,14 +74,31 @@ func New(opts ...Option) (*Handler, error) {
 		server: &http.Server{
 			Addr: net.JoinHostPort(host, port),
 		},
+		logger: o.logger,
 	}
+	o.registry.MustRegister(
+		prometheus.NewGoCollector(),
+		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
+	)
+
 	o.registry.MustRegister(o.collectors...)
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.InstrumentMetricHandler(o.registry, promhttp.HandlerFor(o.registry, promhttp.HandlerOpts{})))
+
+	if o.enableProfile {
+		level.Info(h.logger).Log("msg", "enable pprofile")
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	}
+
 	h.server.Handler = mux
 	return h, nil
 }
 
 func (h *Handler) Run(_ context.Context) error {
+	level.Info(h.logger).Log("msg", "starting HTTP handler", "addr", h.server.Addr)
 	return h.server.ListenAndServe()
 }

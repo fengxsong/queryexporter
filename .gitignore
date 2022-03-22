@@ -25,4 +25,5 @@ bin
 
 build/_output
 vendor/
-.vscode/%
+.vscode/*
+config.yaml
