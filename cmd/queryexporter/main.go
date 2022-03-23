@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/pflag"
+	"sigs.k8s.io/yaml"
 
 	"git.irootech.com/sre/queryexporter/pkg/collector"
 	"git.irootech.com/sre/queryexporter/pkg/config"
@@ -21,6 +22,7 @@ const app = "queryexporter"
 func main() {
 	printVersion := pflag.BoolP("version", "v", false, "Print version info")
 	configFile := pflag.StringP("config", "c", "config.yaml", "Configfile path")
+	test := pflag.Bool("test", false, "Print configfile for test")
 	pflag.Parse()
 	if *printVersion {
 		fmt.Println(version.Print(app))
@@ -31,6 +33,10 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read config file %s: %v", *configFile, err)
 		os.Exit(1)
+	}
+	if *test {
+		dumpYaml(cfg)
+		return
 	}
 	logger := initLogger(cfg.LogFormat, cfg.LogLevel)
 
@@ -52,6 +58,15 @@ func main() {
 	if err = srv.Run(context.Background()); err != nil {
 		level.Error(logger).Log("err", err)
 		os.Exit(1)
+	}
+}
+
+func dumpYaml(cfg *config.Config) {
+	out, err := yaml.Marshal(cfg)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	} else {
+		fmt.Printf("%s\n", out)
 	}
 }
 

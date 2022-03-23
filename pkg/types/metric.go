@@ -11,26 +11,26 @@ const (
 )
 
 type Server struct {
-	Name string `yaml:"name"`
-	URI  string `yaml:"uri"`
+	Name string `json:"name"`
+	URI  string `json:"uri"`
 }
 
 type DataSource struct {
-	Server   `yaml:",inline"`
-	Database string `yaml:"database"`
-	Table    string `yaml:"table"`
+	Server   `json:",inline"`
+	Database string `json:"database"`
+	Table    string `json:"table"`
 }
 
 type Metric struct {
-	Name string `yaml:"name"`
-	Help string `yaml:"help"`
-	Type string `yaml:"type" default:"gauge"`
+	Name string `json:"name"`
+	Help string `json:"help"`
+	Type string `json:"type" default:"gauge"`
 	// for dynamic labels from query results
-	VariableLabels []string `yaml:"variableLabels,omitempty"`
+	VariableLabels []string `json:"variableLabels,omitempty"`
 	// for taking value from result
-	VariableValue string            `yaml:"variableValue"`
-	ConstLabels   prometheus.Labels `yaml:"constLabels,omitempty"`
-	Query         string            `yaml:"query"`
+	VariableValue string            `json:"variableValue"`
+	ConstLabels   prometheus.Labels `json:"constLabels,omitempty"`
+	Query         string            `json:"query"`
 
 	desc *prometheus.Desc
 }

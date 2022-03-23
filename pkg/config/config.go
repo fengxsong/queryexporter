@@ -12,17 +12,17 @@ import (
 )
 
 type Metric struct {
-	*types.Metric `yaml:",inline"`
-	DataSources   []*types.DataSource `yaml:"datasources"`
+	*types.Metric `json:",inline"`
+	DataSources   []*types.DataSource `json:"datasources"`
 }
 
 type Config struct {
-	LogLevel      string               `yaml:"logLevel" default:"info"`
-	LogFormat     string               `yaml:"logFormat" default:"console"`
-	Addr          string               `yaml:"addr" default:":9696"`
-	EnableProfile *bool                `yaml:"enableProfile" default:"true"`
-	Servers       []*types.Server      `yaml:"servers"`
-	Metrics       map[string][]*Metric `yaml:"metrics"`
+	LogLevel      string               `json:"logLevel" default:"info"`
+	LogFormat     string               `json:"logFormat" default:"console"`
+	Addr          string               `json:"addr" default:":9696"`
+	EnableProfile *bool                `json:"enableProfile" default:"true"`
+	Servers       []*types.Server      `json:"servers"`
+	Metrics       map[string][]*Metric `json:"metrics"`
 }
 
 func (c *Config) validateAndSetDefaults() error {
