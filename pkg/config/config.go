@@ -2,9 +2,8 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 
+	"github.com/a8m/envsubst"
 	"github.com/creasty/defaults"
 	"sigs.k8s.io/yaml"
 
@@ -63,11 +62,10 @@ func (c *Config) validateAndSetDefaults() error {
 }
 
 func ReadFromFile(fn string) (*Config, error) {
-	content, err := ioutil.ReadFile(fn)
+	data, err := envsubst.ReadFile(fn)
 	if err != nil {
 		return nil, err
 	}
-	data := os.ExpandEnv(string(content))
 	var cfg Config
 	if err = yaml.Unmarshal([]byte(data), &cfg); err != nil {
 		return nil, err

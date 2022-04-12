@@ -47,6 +47,9 @@ func (m *Metric) Validate() error {
 	default:
 		return fmt.Errorf("unsupported type %s", m.Type)
 	}
+	if m.VariableValue == "" {
+		return fmt.Errorf("variableValue field must specified for metric %s", m.Name)
+	}
 	return nil
 }
 
