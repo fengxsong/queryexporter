@@ -6,6 +6,8 @@ servers:
     uri: username:password@protocol(address)/dbname?param=value
   - name: test-pg
     uri: "host=${TEST_PG_HOST} port=5432 user=${TEST_PG_USER} password=${TEST_PG_PASSWORD} dbname=dbname sslmode=disable"
+  - name: test-mongo
+    uri: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:27017/test?replicaSet=${MONGO_RS}&authSource=admin"
 metrics:
   mysql:
     - name: test_count
@@ -25,4 +27,41 @@ metrics:
           database: dbname
           table: table_name
   mongo:
-  # same as mysql/pg
+    - name: tenant_device_count
+      query: |
+        [
+            {
+                "$$match":{
+                    "tenantId":{
+                      "$$in":[
+                        "5f867ef96e5dad004d557644",
+                        "619dab7ee2f6f000441bac59"
+                      ]
+                    }
+                }
+            },
+            {
+                "$$group":{
+                    "_id":"$$tenantId",
+                    "total":{
+                        "$$sum":1
+                    }
+                }
+            },
+            {
+                "$$sort":{
+                    "total":-1
+                }
+            },
+            {
+                "$$limit":10000
+            }
+        ]
+      type: gauge
+      variableValue: total
+      variableLabels:
+        - _id
+      datasources:
+        - name: test-mongo
+          database: ${MONGO_DATABASE}
+          table: Device
