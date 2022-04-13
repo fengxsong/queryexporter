@@ -3,6 +3,7 @@ module git.irootech.com/sre/queryexporter
 go 1.18
 
 require (
+	github.com/a8m/envsubst v1.3.0
 	github.com/creasty/defaults v1.5.2
 	github.com/go-kit/log v0.1.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -16,7 +17,6 @@ require (
 )
 
 require (
-	github.com/a8m/envsubst v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
