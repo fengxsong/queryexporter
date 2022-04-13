@@ -7,7 +7,7 @@ import (
 	"github.com/creasty/defaults"
 	"sigs.k8s.io/yaml"
 
-	"git.irootech.com/sre/queryexporter/pkg/types"
+	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
 type Metric struct {

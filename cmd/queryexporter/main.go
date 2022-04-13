@@ -12,9 +12,9 @@ import (
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
-	"git.irootech.com/sre/queryexporter/pkg/collector"
-	"git.irootech.com/sre/queryexporter/pkg/config"
-	"git.irootech.com/sre/queryexporter/pkg/handler"
+	"github.com/fengxsong/queryexporter/pkg/collector"
+	"github.com/fengxsong/queryexporter/pkg/config"
+	"github.com/fengxsong/queryexporter/pkg/handler"
 )
 
 const app = "queryexporter"

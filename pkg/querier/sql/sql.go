@@ -9,8 +9,8 @@ import (
 	_ "github.com/lib/pq"
 	"go.uber.org/multierr"
 
-	"git.irootech.com/sre/queryexporter/pkg/querier/factory"
-	"git.irootech.com/sre/queryexporter/pkg/types"
+	"github.com/fengxsong/queryexporter/pkg/querier/factory"
+	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
 type sqlDriver struct {

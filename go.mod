@@ -1,4 +1,4 @@
-module git.irootech.com/sre/queryexporter
+module github.com/fengxsong/queryexporter
 
 go 1.18
 

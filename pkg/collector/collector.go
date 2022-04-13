@@ -9,9 +9,9 @@ import (
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"git.irootech.com/sre/queryexporter/pkg/config"
-	_ "git.irootech.com/sre/queryexporter/pkg/querier"
-	"git.irootech.com/sre/queryexporter/pkg/querier/factory"
+	"github.com/fengxsong/queryexporter/pkg/config"
+	_ "github.com/fengxsong/queryexporter/pkg/querier"
+	"github.com/fengxsong/queryexporter/pkg/querier/factory"
 )
 
 type queries struct {

@@ -1,8 +1,9 @@
 package querier
 
 import (
-	_ "git.irootech.com/sre/queryexporter/pkg/querier/mongo"
-	_ "git.irootech.com/sre/queryexporter/pkg/querier/sql"
+	_ "github.com/fengxsong/queryexporter/pkg/querier/http"
+	_ "github.com/fengxsong/queryexporter/pkg/querier/mongo"
+	_ "github.com/fengxsong/queryexporter/pkg/querier/sql"
 )
 
 //

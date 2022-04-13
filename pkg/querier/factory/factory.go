@@ -7,7 +7,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"git.irootech.com/sre/queryexporter/pkg/types"
+	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
 type Interface interface {

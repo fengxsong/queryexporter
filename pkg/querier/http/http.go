@@ -13,8 +13,8 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"git.irootech.com/sre/queryexporter/pkg/querier/factory"
-	"git.irootech.com/sre/queryexporter/pkg/types"
+	"github.com/fengxsong/queryexporter/pkg/querier/factory"
+	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
 const name = "http"
