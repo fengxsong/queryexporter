@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/spf13/cast"
 )
 
 type Result map[string]interface{}
@@ -14,7 +15,7 @@ func (r Result) Get(k string) string {
 	if !ok {
 		return ""
 	}
-	return fmt.Sprintf("%v", val)
+	return cast.ToString(val)
 }
 
 func (r Result) GetValue(k string) (float64, error) {
@@ -22,20 +23,11 @@ func (r Result) GetValue(k string) (float64, error) {
 	if !ok {
 		return 0, fmt.Errorf("cannot find value field %s", k)
 	}
-
-	switch val.(type) {
-	case float32:
-		return float64(val.(float32)), nil
-	case float64:
-		return val.(float64), nil
-	case int32:
-		return float64(val.(int32)), nil
-	case int64:
-		return float64(val.(int64)), nil
+	switch k := val.(type) {
 	case []byte:
-		return strconv.ParseFloat(string(val.([]uint8)), 64)
+		return strconv.ParseFloat(string(k), 64)
 	default:
-		return 0, fmt.Errorf("value must be number /or bytes, type %T value %v given", val, val)
+		return cast.ToFloat64E(val)
 	}
 }
 

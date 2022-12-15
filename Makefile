@@ -35,7 +35,7 @@ linux-bin: mkdir
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o ${OUTPUT_PATH}/${APP_NAME}-linux-amd64 ${BUILD_PATH} || exit 1
 
 upx: bin
-	upx ${OUTPUT_PATH}
+	upx ${OUTPUT_PATH}/${APP_NAME}
 
 # Build the docker image
 docker-build:
