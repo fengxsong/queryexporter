@@ -1,9 +1,13 @@
 package factory
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"sync"
+	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
@@ -21,6 +25,12 @@ type Factory struct {
 	queriers map[string]Interface
 }
 
+var bufPool = sync.Pool{
+	New: func() any {
+		return &bytes.Buffer{}
+	},
+}
+
 func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, driver string, dss []*types.DataSource, metric *types.Metric, ch chan<- prometheus.Metric) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range dss {
@@ -30,8 +40,21 @@ func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, dri
 			if !ok {
 				return fmt.Errorf("querier %s not implemented yet", driver)
 			}
+			tp, err := defaultTpl.Parse(metric.Query)
+			if err != nil {
+				return err
+			}
+			buf := bufPool.Get().(*bytes.Buffer)
+			defer func() {
+				buf.Reset()
+				bufPool.Put(buf)
+			}()
+			// currently only support using some template functions
+			if err = tp.Execute(buf, map[string]any{}); err != nil {
+				return err
+			}
 			l := log.With(logger, "driver", driver)
-			rets, err := iface.Query(logutil.InjectContext(ctx, l), ds, metric.Query)
+			rets, err := iface.Query(logutil.InjectContext(ctx, l), ds, buf.String())
 			if err != nil {
 				return err
 			}
@@ -61,4 +84,12 @@ var Default = &Factory{
 
 func Register(driver string, iface Interface) {
 	Default.Register(driver, iface)
+}
+
+var defaultTpl *template.Template
+
+func init() {
+	defaultTpl = template.New("goTpl").
+		Option("missingkey=default").
+		Funcs(sprig.TxtFuncMap())
 }
