@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=golang:1.18-alpine
+ARG BUILD_IMAGE=golang:1.20-alpine
 
 FROM $BUILD_IMAGE as build
 WORKDIR /workspace
@@ -10,6 +10,6 @@ COPY pkg /workspace/pkg
 ARG GOFLAGS
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${GOFLAGS} -o queryexporter cmd/queryexporter/main.go
 
-FROM alpine:3.14
+FROM alpine:3.17
 COPY --from=build /workspace/queryexporter /usr/local/bin/queryexporter
 ENTRYPOINT [ "/usr/local/bin/queryexporter" ]
