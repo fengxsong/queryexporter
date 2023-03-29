@@ -20,6 +20,7 @@ import (
 const app = "queryexporter"
 
 func main() {
+	expandEnv := pflag.Bool("expand-env", false, "Expand env in config file")
 	printVersion := pflag.BoolP("version", "v", false, "Print version info")
 	configFile := pflag.StringP("config", "c", "config.yaml", "Configfile path")
 	test := pflag.Bool("test", false, "Print configfile for test")
@@ -29,7 +30,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := config.ReadFromFile(*configFile)
+	cfg, err := config.ReadFromFile(*configFile, *expandEnv)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read config file %s: %v", *configFile, err)
 		os.Exit(1)

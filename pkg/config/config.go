@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	"github.com/a8m/envsubst"
 	"github.com/creasty/defaults"
@@ -61,8 +62,16 @@ func (c *Config) validateAndSetDefaults() error {
 	return nil
 }
 
-func ReadFromFile(fn string) (*Config, error) {
-	data, err := envsubst.ReadFile(fn)
+func ReadFromFile(fn string, expandEnv bool) (*Config, error) {
+	var (
+		data []byte
+		err  error
+	)
+	if expandEnv {
+		data, err = envsubst.ReadFile(fn)
+	} else {
+		data, err = ioutil.ReadFile(fn)
+	}
 	if err != nil {
 		return nil, err
 	}

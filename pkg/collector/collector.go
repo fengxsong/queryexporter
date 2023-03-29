@@ -58,7 +58,7 @@ func (q *queries) Collect(ch chan<- prometheus.Metric) {
 				defer wg.Done()
 				start := time.Now()
 				// TODO: do actual collect
-				err := factory.Default.Process(ctx, q.namespace, subsystem, metric.DataSources, metric.Metric, ch)
+				err := factory.Default.Process(ctx, q.logger, q.namespace, subsystem, metric.DataSources, metric.Metric, ch)
 				if err != nil {
 					level.Error(q.logger).Log("err", err)
 				}

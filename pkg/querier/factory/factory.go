@@ -3,10 +3,12 @@ package factory
 import (
 	"context"
 	"fmt"
-	"sync"
 
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 
+	logutil "github.com/fengxsong/queryexporter/pkg/logger"
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
@@ -19,40 +21,31 @@ type Factory struct {
 	queriers map[string]Interface
 }
 
-func (f *Factory) Process(ctx context.Context, namespace, driver string, dss []*types.DataSource, metric *types.Metric, ch chan<- prometheus.Metric) error {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 1)
+func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, driver string, dss []*types.DataSource, metric *types.Metric, ch chan<- prometheus.Metric) error {
+	eg, ctx := errgroup.WithContext(ctx)
 	for i := range dss {
-		wg.Add(1)
-		go func(ds *types.DataSource) {
-			defer wg.Done()
+		ds := dss[i]
+		eg.Go(func() error {
 			iface, ok := f.queriers[driver]
 			if !ok {
-				errCh <- fmt.Errorf("querier %s not implemented yet", driver)
-				return
+				return fmt.Errorf("querier %s not implemented yet", driver)
 			}
-			rets, err := iface.Query(ctx, ds, metric.Query)
+			l := log.With(logger, "driver", driver)
+			rets, err := iface.Query(logutil.InjectContext(ctx, l), ds, metric.Query)
 			if err != nil {
-				errCh <- err
-				return
+				return err
 			}
 			for i := range rets {
 				m, err := types.CreateMetric(namespace, driver, ds, metric, rets[i])
 				if err != nil {
-					errCh <- err
-					return
+					return err
 				}
 				ch <- m
 			}
-		}(dss[i])
+			return nil
+		})
 	}
-	wg.Wait()
-	select {
-	case err := <-errCh:
-		return err
-	default:
-		return nil
-	}
+	return eg.Wait()
 }
 
 func (f *Factory) Register(driver string, iface Interface) {
