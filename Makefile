@@ -2,9 +2,9 @@ APP_NAME ?= queryexporter
 
 BUILD_DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 BUILD_USER = $(shell whoami)
-REVISION = $(shell git describe --dirty --tags --always)
+VERSION ?= $(shell git describe --dirty --tags --always)
+REVISION = $(shell git rev-parse --short HEAD)
 BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
-VERSION ?= unknown
 
 BUILD_PATH = cmd/queryexporter/main.go
 OUTPUT_PATH = build/_output/bin
@@ -25,22 +25,23 @@ tidy:
 vendor: tidy
 	go mod vendor
 
-mkdir:
-	mkdir -p ${OUTPUT_PATH}
+clean:
+	rm -rf bin/
 
-bin: mkdir
-	CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o ${OUTPUT_PATH}/${APP_NAME} ${BUILD_PATH} || exit 1
+.PHONY: bin/queryexporter
+bin/queryexporter.%:
+	GOOS=$(word 2,$(subst ., ,$@)) GOARCH=$(word 3,$(subst ., ,$@)) CGO_ENABLED=0 go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o $@ ${BUILD_PATH}
+local-cross: clean bin/queryexporter.linux.amd64 bin/queryexporter.linux.arm64
 
-linux-bin: mkdir
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o ${OUTPUT_PATH}/${APP_NAME}-linux-amd64 ${BUILD_PATH} || exit 1
+upx: local-cross
+	upx bin/queryexporter.linux.amd64
 
-upx: bin
-	upx ${OUTPUT_PATH}/${APP_NAME}
+# Build multiarch container images
+buildimages:
+	buildah manifest create ${APP_NAME}
+	buildah build --manifest ${APP_NAME} --arch amd64 --build-arg TARGETOS=linux --build-arg TARGETARCH=amd64 --build-arg LDFLAGS="${LDFLAGS}" -t ${IMAGE} -t ${IMAGE_REPO}:latest -f Dockerfile .
+	buildah build --manifest ${APP_NAME} --arch arm64 --build-arg TARGETOS=linux --build-arg TARGETARCH=arm64 --build-arg LDFLAGS="${LDFLAGS}" -t ${IMAGE} -t ${IMAGE_REPO}:latest -f Dockerfile .
 
-# Build the docker image
-docker-build:
-	docker build --rm --build-arg=LDFLAGS="${LDFLAGS}" -t ${IMAGE} -t ${IMAGE_REPO}:latest -f Dockerfile .
-
-# Push the docker image
-docker-push:
-	docker push ${IMAGE}
+# Push the images
+pushimages:
+	buildah manifest push --all ${APP_NAME} docker://docker.io/${IMAGE}
