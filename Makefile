@@ -40,8 +40,8 @@ upx: local-cross
 
 # Build multiarch container images
 buildimages:
-	# You Must mount binfmt_misc first [if you are running in container]
-	test -f /proc/sys/fs/binfmt_misc/register || mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
+	# Make sure qemu-user-static+binfmt-support is installed
+	update-binfmts --enable
 	${BUILDAH} manifest create ${APP_NAME}
 	${BUILDAH} build --manifest ${APP_NAME} --arch amd64 --build-arg TARGETOS=linux --build-arg TARGETARCH=amd64 --build-arg LDFLAGS="${LDFLAGS}" -t ${IMAGE} -t ${IMAGE_REPO}:latest -f Dockerfile .
 	${BUILDAH} build --manifest ${APP_NAME} --arch arm64 --build-arg TARGETOS=linux --build-arg TARGETARCH=arm64 --build-arg LDFLAGS="${LDFLAGS}" -t ${IMAGE} -t ${IMAGE_REPO}:latest -f Dockerfile .
