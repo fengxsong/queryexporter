@@ -14,8 +14,8 @@ OUTPUT_PATH = build/_output/bin
 LDFLAGS := -s -X github.com/prometheus/common/version.Version=${VERSION} \
 	-X github.com/prometheus/common/version.Revision=${REVISION} \
 	-X github.com/prometheus/common/version.Branch=${BRANCH} \
-	-X github.com/prometheus/common/version.BuildUser=${BUILD_DATE} \
-	-X github.com/prometheus/common/version.BuildDate=${BUILD_USER}
+	-X github.com/prometheus/common/version.BuildUser=${BUILD_USER} \
+	-X github.com/prometheus/common/version.BuildDate=${BUILD_DATE}
 
 IMAGE_REPO ?= fengxsong/${APP_NAME}
 IMAGE_TAG ?= ${REVISION}
