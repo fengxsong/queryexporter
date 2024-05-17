@@ -20,6 +20,10 @@ import (
 const app = "queryexporter"
 
 func main() {
+	os.Exit(Main())
+}
+
+func Main() int {
 	expandEnv := pflag.Bool("expand-env", false, "Expand env in config file")
 	printVersion := pflag.BoolP("version", "v", false, "Print version info")
 	configFile := pflag.StringP("config", "c", "config.yaml", "Configfile path")
@@ -27,24 +31,24 @@ func main() {
 	pflag.Parse()
 	if *printVersion {
 		fmt.Println(version.Print(app))
-		os.Exit(0)
+		return 0
 	}
 
 	cfg, err := config.ReadFromFile(*configFile, *expandEnv)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read config file %s: %v", *configFile, err)
-		os.Exit(1)
+		return 1
 	}
 	if *test {
 		dumpYaml(cfg)
-		return
+		return 0
 	}
 	logger := initLogger(cfg.LogFormat, cfg.LogLevel)
 
 	clt, err := collector.New(app, cfg, logger)
 	if err != nil {
 		level.Error(logger).Log("msg", "cannot create collector", "err", err)
-		os.Exit(1)
+		return 1
 	}
 	srv, err := handler.New(
 		handler.WithAddr(cfg.Addr),
@@ -54,12 +58,13 @@ func main() {
 	)
 	if err != nil {
 		level.Error(logger).Log("err", err)
-		os.Exit(1)
+		return 1
 	}
 	if err = srv.Run(context.Background()); err != nil {
 		level.Error(logger).Log("err", err)
-		os.Exit(1)
+		return 1
 	}
+	return 0
 }
 
 func dumpYaml(cfg *config.Config) {

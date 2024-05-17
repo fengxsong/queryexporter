@@ -9,6 +9,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
@@ -58,6 +59,7 @@ func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, dri
 			if err != nil {
 				return err
 			}
+			level.Debug(l).Log("results", rets)
 			for i := range rets {
 				m, err := types.CreateMetric(namespace, driver, ds, metric, rets[i])
 				if err != nil {

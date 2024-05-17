@@ -2,6 +2,7 @@ package collector
 
 import (
 	"context"
+	"strconv"
 	"sync"
 	"time"
 
@@ -34,7 +35,7 @@ func New(name string, cfg *config.Config, logger log.Logger) (prometheus.Collect
 		scrapeDurationDesc: prometheus.NewDesc(
 			prometheus.BuildFQName(name, "", "scrape_duration"),
 			"querier scrape duration",
-			[]string{"driver", "metric"}, nil,
+			[]string{"driver", "metric", "success"}, nil,
 		),
 	}
 	return qs, nil
@@ -65,8 +66,8 @@ func (q *queries) Collect(ch chan<- prometheus.Metric) {
 				ch <- prometheus.MustNewConstMetric(
 					q.scrapeDurationDesc,
 					prometheus.GaugeValue,
-					time.Now().Sub(start).Seconds(),
-					subsystem, metric.String())
+					time.Since(start).Seconds(),
+					subsystem, metric.String(), strconv.FormatBool(err == nil))
 			}(driver, metrics[i])
 		}
 	}

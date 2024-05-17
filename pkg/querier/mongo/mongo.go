@@ -70,7 +70,6 @@ func (d *mongoDriver) Query(ctx context.Context, ds *types.DataSource, query str
 	if len(errs) > 0 {
 		return nil, multierr.Combine(errs...)
 	}
-	level.Debug(logger).Log("results", rets)
 	return rets, nil
 }
 

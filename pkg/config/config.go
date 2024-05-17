@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/a8m/envsubst"
 	"github.com/creasty/defaults"
@@ -70,7 +70,7 @@ func ReadFromFile(fn string, expandEnv bool) (*Config, error) {
 	if expandEnv {
 		data, err = envsubst.ReadFile(fn)
 	} else {
-		data, err = ioutil.ReadFile(fn)
+		data, err = os.ReadFile(fn)
 	}
 	if err != nil {
 		return nil, err

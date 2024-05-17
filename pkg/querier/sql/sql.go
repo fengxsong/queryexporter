@@ -46,13 +46,13 @@ func (d *sqlDriver) Query(ctx context.Context, ds *types.DataSource, query strin
 		return nil, err
 	}
 	var (
-		rets = make([]types.Result, 0)
-		errs = make([]error, 0)
+		rets []types.Result
+		errs []error
 	)
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
 		columnPointers := make([]interface{}, len(cols))
-		for i, _ := range columns {
+		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 

@@ -38,7 +38,7 @@ func CreateMetric(namespace, subsystem string, ds *DataSource, metric *Metric, r
 	if err != nil {
 		return nil, err
 	}
-	labelValues := make([]string, 0)
+	labelValues := make([]string, 0, len(metric.VariableLabels)+len(builtinLabels))
 	desc := metric.Desc(namespace, subsystem, builtinLabels...)
 	for _, labelVar := range metric.VariableLabels {
 		labelValues = append(labelValues, ret.Get(labelVar))
