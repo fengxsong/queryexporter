@@ -41,7 +41,7 @@ func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, dri
 			if !ok {
 				return fmt.Errorf("querier %s not implemented yet", driver)
 			}
-			tp, err := defaultTpl.Parse(metric.Query)
+			tp, err := defaultTpl().Parse(metric.Query)
 			if err != nil {
 				return err
 			}
@@ -88,10 +88,8 @@ func Register(driver string, iface Interface) {
 	Default.Register(driver, iface)
 }
 
-var defaultTpl *template.Template
-
-func init() {
-	defaultTpl = template.New("goTpl").
+func defaultTpl() *template.Template {
+	return template.New("goTpl").
 		Option("missingkey=default").
 		Funcs(sprig.TxtFuncMap())
 }
