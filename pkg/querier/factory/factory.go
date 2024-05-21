@@ -41,7 +41,11 @@ func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, dri
 			if !ok {
 				return fmt.Errorf("querier %s not implemented yet", driver)
 			}
-			tp, err := defaultTpl.Parse(metric.Query)
+			tp, err := defaultTpl.Clone()
+			if err != nil {
+				return err
+			}
+			tp, err = tp.Parse(metric.Query)
 			if err != nil {
 				return err
 			}
