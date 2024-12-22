@@ -6,5 +6,3 @@ import (
 	_ "github.com/fengxsong/queryexporter/pkg/querier/redis"
 	_ "github.com/fengxsong/queryexporter/pkg/querier/sql"
 )
-
-//

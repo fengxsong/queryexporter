@@ -4,13 +4,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/go-kit/log/level"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/multierr"
 
-	logutil "github.com/fengxsong/queryexporter/pkg/logger"
 	"github.com/fengxsong/queryexporter/pkg/querier/factory"
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
@@ -44,12 +42,11 @@ func (d *mongoDriver) aggregate(ctx context.Context, uri, db, col string, pipeli
 }
 
 func (d *mongoDriver) Query(ctx context.Context, ds *types.DataSource, query string) ([]types.Result, error) {
-	logger := logutil.FromContext(ctx)
 	var pipeline bson.A
 	if err := bson.UnmarshalExtJSON([]byte(query), false, &pipeline); err != nil {
 		return nil, err
 	}
-	level.Debug(logger).Log("pipeline", pipeline)
+
 	cur, err := d.aggregate(ctx, ds.URI, ds.Database, ds.Table, pipeline)
 	if err != nil {
 		return nil, err

@@ -4,21 +4,18 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
-	logutil "github.com/fengxsong/queryexporter/pkg/logger"
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
 type Interface interface {
-	// Name() string
 	Query(ctx context.Context, ds *types.DataSource, query string) ([]types.Result, error)
 }
 
@@ -32,7 +29,7 @@ var bufPool = sync.Pool{
 	},
 }
 
-func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, driver string, dss []*types.DataSource, metric *types.Metric, ch chan<- prometheus.Metric) error {
+func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, driver string, dss []*types.DataSource, metric *types.MetricDesc, ch chan<- prometheus.Metric) error {
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range dss {
 		ds := dss[i]
@@ -58,14 +55,14 @@ func (f *Factory) Process(ctx context.Context, logger log.Logger, namespace, dri
 			if err = tp.Execute(buf, map[string]any{}); err != nil {
 				return err
 			}
-			l := log.With(logger, "driver", driver)
-			rets, err := iface.Query(logutil.InjectContext(ctx, l), ds, buf.String())
+
+			rets, err := iface.Query(ctx, ds, buf.String())
 			if err != nil {
 				return err
 			}
-			level.Debug(l).Log("results", rets)
+			logger.With("driver", driver).Debug("", "results", rets)
 			for i := range rets {
-				m, err := types.CreateMetric(namespace, driver, ds, metric, rets[i])
+				m, err := types.CreateGaugeMetric(namespace, driver, ds, metric, rets[i])
 				if err != nil {
 					return err
 				}

@@ -1,6 +1,3 @@
-enableProfile: false
-logFormat: json
-logLevel: debug
 servers:
   - name: test-mysql
     uri: username:password@protocol(address)/dbname?param=value
@@ -8,7 +5,7 @@ servers:
     uri: "host=${TEST_PG_HOST} port=5432 user=${TEST_PG_USER} password=${TEST_PG_PASSWORD} dbname=dbname sslmode=disable"
   - name: test-mongo
     uri: "mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}:27017/test?replicaSet=${MONGO_RS}&authSource=admin"
-metrics:
+aggregations:
   mysql:
     - name: test_count
       query: select count(*) from table_name

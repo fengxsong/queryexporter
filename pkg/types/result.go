@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-type Result map[string]interface{}
+type Result map[string]any
 
 func (r Result) Get(k string) string {
 	val, ok := r[k]
@@ -33,14 +33,14 @@ func (r Result) GetValue(k string) (float64, error) {
 
 var builtinLabels = []string{"name", "database", "table"}
 
-func CreateMetric(namespace, subsystem string, ds *DataSource, metric *Metric, ret Result) (prometheus.Metric, error) {
-	val, err := ret.GetValue(metric.VariableValue)
+func CreateGaugeMetric(namespace, subsystem string, ds *DataSource, m *MetricDesc, ret Result) (prometheus.Metric, error) {
+	val, err := ret.GetValue(m.VariableValue)
 	if err != nil {
 		return nil, err
 	}
-	labelValues := make([]string, 0, len(metric.VariableLabels)+len(builtinLabels))
-	desc := metric.Desc(namespace, subsystem, builtinLabels...)
-	for _, labelVar := range metric.VariableLabels {
+	labelValues := make([]string, 0, len(m.VariableLabels)+len(builtinLabels))
+	desc := m.ToDesc(namespace, subsystem, builtinLabels...)
+	for _, labelVar := range m.VariableLabels {
 		labelValues = append(labelValues, ret.Get(labelVar))
 	}
 	labelValues = append(labelValues, ds.Name, ds.Database, ds.Table)

@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=golang:1.20-alpine
+ARG BUILD_IMAGE=golang:1.23-alpine
 
 FROM $BUILD_IMAGE as build
 ARG TARGETOS
@@ -9,10 +9,10 @@ WORKDIR /workspace
 ENV GOPROXY=https://goproxy.cn
 COPY go.mod go.sum /workspace/
 RUN go mod download
-COPY cmd /workspace/cmd
+COPY main.go /workspace/
 COPY pkg /workspace/pkg
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o queryexporter cmd/queryexporter/main.go
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -installsuffix cgo -ldflags "${LDFLAGS}" -o queryexporter main.go
 
-FROM alpine:3.17
+FROM alpine:3
 COPY --from=build /workspace/queryexporter /usr/local/bin/queryexporter
 ENTRYPOINT [ "/usr/local/bin/queryexporter" ]

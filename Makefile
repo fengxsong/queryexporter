@@ -8,7 +8,7 @@ BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
 GO ?= go
 BUILDAH ?= buildah
 
-BUILD_PATH = cmd/queryexporter/main.go
+BUILD_PATH = main.go
 OUTPUT_PATH = build/_output/bin
 
 LDFLAGS := -s -X github.com/prometheus/common/version.Version=${VERSION} \

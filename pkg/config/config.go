@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/a8m/envsubst"
@@ -11,51 +12,41 @@ import (
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
-type Metric struct {
-	*types.Metric `json:",inline"`
-	DataSources   []*types.DataSource `json:"datasources"`
-}
-
 type Config struct {
-	LogLevel      string               `json:"logLevel" default:"info"`
-	LogFormat     string               `json:"logFormat" default:"console"`
-	Addr          string               `json:"addr" default:":9696"`
-	EnableProfile *bool                `json:"enableProfile" default:"true"`
-	Servers       []*types.Server      `json:"servers"`
-	Metrics       map[string][]*Metric `json:"metrics"`
+	Servers      types.Servers                          `json:"servers"`
+	Aggregations map[types.DataSourceType]types.Metrics `json:"aggregations"`
 }
 
 func (c *Config) validateAndSetDefaults() error {
 	servers := make(map[string]*types.Server, len(c.Servers))
-	for _, server := range c.Servers {
-		if _, ok := servers[server.Name]; ok {
-			return fmt.Errorf("duplicate server %s", server.Name)
+	for _, s := range c.Servers {
+		if s.Name == "" {
+			return fmt.Errorf("name property is required of uri %s", s.URI)
 		}
-		servers[server.Name] = server
+		if _, ok := servers[s.Name]; ok {
+			return fmt.Errorf("duplicate server %s", s.Name)
+		}
+		servers[s.Name] = s
 	}
+
 	if err := defaults.Set(c); err != nil {
 		return err
 	}
-	setFunc := func(metrics []*Metric) error {
-		for i := range metrics {
-			m := metrics[i]
-			for j := range m.DataSources {
-				ds := m.DataSources[j]
-				if _, ok := servers[ds.Name]; !ok {
-					return fmt.Errorf("unknown server %s", ds.Name)
-				}
-				if ds.URI == "" {
-					ds.URI = servers[ds.Name].URI
-				}
+
+	setf := func(m *types.Metric) error {
+		for _, ds := range m.DataSources {
+			if _, ok := servers[ds.Name]; !ok {
+				return fmt.Errorf("unknown server %s", ds.Name)
 			}
-			if err := m.Validate(); err != nil {
-				return err
+			if ds.URI == "" {
+				ds.URI = servers[ds.Name].URI
 			}
 		}
-		return nil
+		return m.Validate()
 	}
-	for _, metrics := range c.Metrics {
-		if err := setFunc(metrics); err != nil {
+
+	for _, metrics := range c.Aggregations {
+		if err := metrics.IterFn(setf); err != nil {
 			return err
 		}
 	}
@@ -83,4 +74,13 @@ func ReadFromFile(fn string, expandEnv bool) (*Config, error) {
 		return nil, err
 	}
 	return &cfg, nil
+}
+
+func Dump(c *Config, w io.Writer) {
+	out, err := yaml.Marshal(c)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	} else {
+		fmt.Fprintf(w, "%s", out)
+	}
 }
