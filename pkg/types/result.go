@@ -33,6 +33,10 @@ func (r Result) GetValue(k string) (float64, error) {
 }
 
 func jsonPathGet(objects map[string]any, key string) any {
+	// fastest path
+	if v, ok := objects[key]; ok {
+		return v
+	}
 	idx := strings.Index(key, ".")
 	if idx < 0 {
 		return objects[key]
