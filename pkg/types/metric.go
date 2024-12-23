@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -18,8 +19,6 @@ type MetricDesc struct {
 	Query          string            `json:"query"`
 	VariableLabels []string          `json:"variableLabels,omitempty"` // for dynamic labels from query results
 	ConstLabels    prometheus.Labels `json:"constLabels,omitempty"`
-
-	desc *prometheus.Desc
 }
 
 func (m *MetricDesc) String() string {
@@ -44,12 +43,14 @@ func (m *MetricDesc) ToDesc(namespace, subsystem string, labels ...string) *prom
 	if len(labels) < 3 {
 		panic("Must include builtin labels name/database/table")
 	}
-	variableLabels := append(m.VariableLabels, labels...)
-	if m.desc == nil {
-		m.desc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, subsystem, m.Name),
-			m.Help, variableLabels, m.ConstLabels,
-		)
+	var variableLabels []string
+	for i := range m.VariableLabels {
+		variableLabels = append(variableLabels, strings.ReplaceAll(m.VariableLabels[i], ".", "_"))
 	}
-	return m.desc
+	variableLabels = append(variableLabels, labels...)
+
+	return prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, subsystem, m.Name),
+		m.Help, variableLabels, m.ConstLabels,
+	)
 }

@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cast"
@@ -11,8 +12,8 @@ import (
 type Result map[string]any
 
 func (r Result) Get(k string) string {
-	val, ok := r[k]
-	if !ok {
+	val := jsonPathGet(r, k)
+	if val == nil {
 		return ""
 	}
 	return cast.ToString(val)
@@ -29,6 +30,21 @@ func (r Result) GetValue(k string) (float64, error) {
 	default:
 		return cast.ToFloat64E(val)
 	}
+}
+
+func jsonPathGet(objects map[string]any, key string) any {
+	idx := strings.Index(key, ".")
+	if idx < 0 {
+		return objects[key]
+	}
+
+	if v, ok := objects[key[0:idx]]; ok {
+		if m, ok1 := v.(Result); ok1 {
+			return jsonPathGet(m, key[idx+1:])
+		}
+		return v
+	}
+	return nil
 }
 
 var builtinLabels = []string{"name", "database", "table"}
