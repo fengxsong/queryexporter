@@ -30,6 +30,7 @@ var bufPool = sync.Pool{
 }
 
 func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, driver string, dss []*types.DataSource, metric *types.MetricDesc, ch chan<- prometheus.Metric) error {
+	logger = logger.With("driver", driver)
 	eg, ctx := errgroup.WithContext(ctx)
 	for i := range dss {
 		ds := dss[i]
@@ -58,7 +59,11 @@ func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, d
 
 			rets, err := iface.Query(ctx, ds, buf.String())
 			if err != nil {
-				return err
+				if metric.ContinueIfError {
+					logger.Error("failed to query", "datasource", dss, "metric", metric.String(), "err", err)
+					return nil
+				}
+				return fmt.Errorf("failed to query %s: %v", ds.String(), err)
 			}
 			logger.With("driver", driver).Debug("",
 				"datasource", dss, "metric", metric.String(),
@@ -66,6 +71,10 @@ func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, d
 			for i := range rets {
 				m, err := types.CreateGaugeMetric(namespace, driver, ds, metric, rets[i])
 				if err != nil {
+					if metric.ContinueIfError {
+						logger.Error("failed to create metric", "datasource", dss, "metric", metric.String(), "err", err)
+						continue
+					}
 					return err
 				}
 				ch <- m

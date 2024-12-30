@@ -12,13 +12,14 @@ const (
 )
 
 type MetricDesc struct {
-	Name           string            `json:"name"`
-	Help           string            `json:"help"`
-	Type           string            `json:"type" default:"gauge"`
-	VariableValue  string            `json:"variableValue"` // for taking value from result
-	Query          string            `json:"query"`
-	VariableLabels []string          `json:"variableLabels,omitempty"` // for dynamic labels from query results
-	ConstLabels    prometheus.Labels `json:"constLabels,omitempty"`
+	Name            string            `json:"name"`
+	Help            string            `json:"help"`
+	Type            string            `json:"type" default:"gauge"`
+	VariableValue   string            `json:"variableValue"` // for taking value from result
+	Query           string            `json:"query"`
+	VariableLabels  []string          `json:"variableLabels,omitempty"` // for dynamic labels from query results
+	ConstLabels     prometheus.Labels `json:"constLabels,omitempty"`
+	ContinueIfError bool              `json:"continueIfError,omitempty"`
 }
 
 func (m *MetricDesc) String() string {
