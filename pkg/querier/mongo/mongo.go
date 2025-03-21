@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/multierr"
 
 	"github.com/fengxsong/queryexporter/pkg/querier/factory"
@@ -25,7 +25,7 @@ func (d *mongoDriver) getCachedClient(uri string) (*mongo.Client, error) {
 		return val.(*mongo.Client), nil
 	}
 
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, err
 	}

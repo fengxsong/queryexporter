@@ -63,7 +63,7 @@ func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, d
 					logger.Error("failed to query", "datasource", dss, "metric", metric.String(), "err", err)
 					return nil
 				}
-				return fmt.Errorf("failed to query %s: %v", ds.String(), err)
+				return fmt.Errorf("failed to query %s with %s, err: %v", ds.String(), buf.String(), err)
 			}
 			logger.With("driver", driver).Debug("",
 				"datasource", dss, "metric", metric.String(),
