@@ -12,6 +12,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/fengxsong/queryexporter/pkg/querier/log"
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
@@ -56,6 +57,8 @@ func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, d
 			if err = tp.Execute(buf, map[string]any{}); err != nil {
 				return err
 			}
+
+			ctx = log.WithLogger(ctx, logger)
 
 			rets, err := iface.Query(ctx, ds, buf.String())
 			if err != nil {

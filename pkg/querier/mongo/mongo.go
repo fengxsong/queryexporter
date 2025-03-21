@@ -10,6 +10,7 @@ import (
 	"go.uber.org/multierr"
 
 	"github.com/fengxsong/queryexporter/pkg/querier/factory"
+	"github.com/fengxsong/queryexporter/pkg/querier/log"
 	"github.com/fengxsong/queryexporter/pkg/types"
 )
 
@@ -46,6 +47,8 @@ func (d *mongoDriver) Query(ctx context.Context, ds *types.DataSource, query str
 	if err := bson.UnmarshalExtJSON([]byte(query), false, &pipeline); err != nil {
 		return nil, err
 	}
+	logger := log.GetLogger(ctx)
+	logger.Debug("query", "pipeline", pipeline)
 
 	cur, err := d.aggregate(ctx, ds.URI, ds.Database, ds.Table, pipeline)
 	if err != nil {
