@@ -32,6 +32,10 @@ func (r Result) GetValue(k string) (float64, error) {
 	}
 }
 
+func (r Result) IsEmpty() bool {
+	return len(r) == 0
+}
+
 func jsonPathGet(objects map[string]any, key string) any {
 	// fastest path
 	if v, ok := objects[key]; ok {
@@ -54,7 +58,15 @@ func jsonPathGet(objects map[string]any, key string) any {
 var builtinLabels = []string{"name", "database", "table"}
 
 func CreateGaugeMetric(namespace, subsystem string, ds *DataSource, m *MetricDesc, ret Result) (prometheus.Metric, error) {
-	val, err := ret.GetValue(m.VariableValue)
+	var (
+		val float64
+		err error
+	)
+	if ret.IsEmpty() && m.AllowEmptyValue {
+		val = 0
+	} else {
+		val, err = ret.GetValue(m.VariableValue)
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -20,13 +20,12 @@ type MetricDesc struct {
 	VariableLabels  []string          `json:"variableLabels,omitempty"` // for dynamic labels from query results
 	ConstLabels     prometheus.Labels `json:"constLabels,omitempty"`
 	ContinueIfError bool              `json:"continueIfError,omitempty"`
+	AllowEmptyValue bool              `json:"allowEmptyValue,omitempty"`
 }
 
 func (m *MetricDesc) String() string {
 	return m.Name
 }
-
-func (m *MetricDesc) setDefaults() {}
 
 func (m *MetricDesc) Validate() error {
 	switch m.Type {

@@ -71,6 +71,9 @@ func (f *Factory) Process(ctx context.Context, logger *slog.Logger, namespace, d
 			logger.With("driver", driver).Debug("",
 				"datasource", dss, "metric", metric.String(),
 				"results", rets)
+			if len(rets) == 0 && metric.AllowEmptyValue {
+				rets = []types.Result{{}}
+			}
 			for i := range rets {
 				m, err := types.CreateGaugeMetric(namespace, driver, ds, metric, rets[i])
 				if err != nil {
