@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=golang:1.23-alpine
+ARG BUILD_IMAGE=golang:1.24-alpine
 
 FROM $BUILD_IMAGE as build
 ARG TARGETOS
