@@ -6,7 +6,6 @@ ARG TARGETARCH
 ARG LDFLAGS
 
 WORKDIR /workspace
-ENV GOPROXY=https://goproxy.cn
 COPY go.mod go.sum /workspace/
 RUN go mod download
 COPY main.go /workspace/
