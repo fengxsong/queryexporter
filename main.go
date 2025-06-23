@@ -63,6 +63,7 @@ func run() int {
 		configF   = kingpin.Flag("config", "Path of config file").Short('c').Default("config.yaml").String()
 		expandEnv = kingpin.Flag("expand-env", "Expand env in config file, for reading secrets from environment variables").Default("false").Bool()
 		test      = kingpin.Flag("test", "Print rendered content of config file").Short('t').Default("false").Bool()
+		namespace = kingpin.Flag("namespace", "Namespace for metrics").Default(app).String()
 	)
 	promslogConfig := &promslog.Config{}
 
@@ -74,7 +75,7 @@ func run() int {
 
 	cfg, err := config.ReadFromFile(*configF, *expandEnv)
 	if err != nil {
-		logger.Error("Failed to read config", "err", err)
+		logger.Error("failed to read config", "err", err)
 		return 1
 	}
 
@@ -82,9 +83,9 @@ func run() int {
 		config.Dump(cfg, os.Stdout)
 		return 0
 	}
-	c, err := collector.New(app, cfg, logger)
+	c, err := collector.New(*namespace, cfg, logger)
 	if err != nil {
-		logger.Error("Failed to create collector", "err", err)
+		logger.Error("failed to create collector", "err", err)
 		return 1
 	}
 
@@ -100,7 +101,7 @@ func run() int {
 
 	landingPage, err := newLandingPage(*metricsPath, healthzPath)
 	if err != nil {
-		logger.Error("Failed to create landing page", "err", err)
+		logger.Error("failed to create landing page", "err", err)
 		return 1
 	}
 
@@ -113,7 +114,7 @@ func run() int {
 
 	go func() {
 		if err := web.ListenAndServe(srv, toolkitFlags, logger); err != nil {
-			logger.Error("Error starting HTTP server", "err", err)
+			logger.Error("error starting HTTP server", "err", err)
 			close(srvc)
 		}
 	}()
@@ -121,7 +122,7 @@ func run() int {
 	for {
 		select {
 		case <-term:
-			logger.Info("Received SIGTERM, exiting gracefully...")
+			logger.Info("received SIGTERM, exiting gracefully")
 			return 0
 		case <-srvc:
 			return 1
