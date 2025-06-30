@@ -63,7 +63,7 @@ func run() int {
 		configF   = kingpin.Flag("config", "Path of config file").Short('c').Default("config.yaml").String()
 		expandEnv = kingpin.Flag("expand-env", "Expand env in config file, for reading secrets from environment variables").Default("false").Bool()
 		test      = kingpin.Flag("test", "Print rendered content of config file").Short('t').Default("false").Bool()
-		namespace = kingpin.Flag("namespace", "Namespace for metrics").Default(app).String()
+		namespace = kingpin.Flag("namespace", "Namespace for metrics").Short('n').Default(app).String()
 	)
 	promslogConfig := &promslog.Config{}
 
