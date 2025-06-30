@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -47,8 +48,18 @@ func jsonPathGet(objects map[string]any, key string) any {
 	}
 
 	if v, ok := objects[key[0:idx]]; ok {
-		if m, ok1 := v.(Result); ok1 {
+		if m, ok1 := v.(map[string]any); ok1 {
 			return jsonPathGet(m, key[idx+1:])
+		}
+		// if v is an object that may implements json.Marshaler, we need to parse it
+		// then revert it to map[string]any
+		parsed, err := json.Marshal(v)
+		if err == nil {
+			var obj map[string]any
+			err := json.Unmarshal(parsed, &obj)
+			if err == nil {
+				return jsonPathGet(obj, key[idx+1:])
+			}
 		}
 		return v
 	}
